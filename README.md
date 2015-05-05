@@ -16,7 +16,7 @@ Open a Julia prompt and call: `Pkg.clone("https://github.com/mrtzh/PrivateMultip
 * Easy-to-use interfaces for custom query sets and data representations
 
 ## Usage
-For illustration, we create a random data set with hidden correlations. Columns correspond to data points.
+For the sake of illustration, we create a random data set with hidden correlations. Columns correspond to data points.
 ```
 d, n = 20, 1000
 data_matrix = rand(0:1,d,n)
@@ -27,6 +27,7 @@ data_matrix[3,:] = data_matrix[1,:] .* data_matrix[2,:]
 
 We can run MWEM to produce synthetic data accurate for 1st, 2nd, 3rd order marginals of the source data.
 ```
+using PrivateMultiplicativeWeights
 mw = mwem(Parities(d,3),Tabular(data_matrix))
 ```
 This will convert the data to its explicit histogram representation of size 2^d and may not be useful when d is large. See section below on factored histograms for a scalable alternative.
