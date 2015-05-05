@@ -28,7 +28,6 @@ end
 #
 # MWEM  algorithm: Iterate noisy max + multiplicative weights update
 #
-
 function mwem(queries::Queries, data::Data;
              epsilon=1.0, iterations=10, repetitions = 5, verbose = false, smart = false)
 

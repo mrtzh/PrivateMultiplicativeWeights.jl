@@ -24,7 +24,7 @@ include("factors.jl")
 include("iterators.jl")
 include("parities.jl")
 include("error.jl")
-include("algorithm.jl")
+include("mwem.jl")
 
 
 end # module
