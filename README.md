@@ -85,3 +85,7 @@ The MWEM algorithm was presented in the following paper:
     year = {2012},
 }
 ```
+
+## Status
+
+[![Build Status](https://api.travis-ci.org/mrtzh/PrivateMultiplicativeWeights.jl.png)](https://api.travis-ci.org/mrtzh/PrivateMultiplicativeWeights.jl)
