@@ -48,7 +48,7 @@ Parameters:
 
 We can convert synthetic data in histogram representation to matrix tabular representation.
 ```
-table = Tabular(mw.synthetic)
+table = Tabular(mw.synthetic, n)
 ```
 Compute error achieved by MWEM:
 ```
