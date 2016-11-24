@@ -1,4 +1,4 @@
-typealias GosperState (Int64,Int64)
+typealias GosperState Tuple{Int64,Int64}
 
 immutable GosperIterator
     n::Int64
@@ -30,6 +30,8 @@ end
 done(it::GosperIterator,state::GosperState) = state[1] > state[2]
 
 # Iterate over all subsets of a collection with a given size
+typealias BinomialState Tuple{Array{Int64,1},Bool}
+
 immutable Binomial{T}
     xs::Array{T,1}
     n::Int64
@@ -41,7 +43,7 @@ length(it::Binomial) = binomial(it.n,it.k)
 subsets(xs,k) = Binomial(xs,length(xs),k)
 start(it::Binomial) = (Int64[1:it.k],false)
 
-function next(it::Binomial,state::(Array{Int64,1},Bool))
+function next(it::Binomial,state::BinomialState)
     idx = state[1]
     set = it.xs[idx]
     i = it.k
@@ -61,4 +63,4 @@ function next(it::Binomial,state::(Array{Int64,1},Bool))
     end
 end
 
-done(it::Binomial,state::(Array{Int64,1},Bool)) = state[2]
+done(it::Binomial,state::BinomialState) = state[2]
