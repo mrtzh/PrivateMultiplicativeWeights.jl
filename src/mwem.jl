@@ -21,8 +21,8 @@ function update!(mwstate::MWState)
     for i = 1:mwstate.repetitions
         for qindex in keys(mwstate.measurements)
             query = get(mwstate.queries, qindex)
-            error = mwstate.measurements[qindex] 
-                        - evaluate(query, mwstate.synthetic)
+            error = (mwstate.measurements[qindex] 
+                        - evaluate(query, mwstate.synthetic))
             update!(query, mwstate.synthetic, error)
         end
     end
@@ -62,8 +62,8 @@ function mwem(queries::Queries,
     for t = 1:iterations
         time = @elapsed begin
             i = noisy_max(mwstate)
-            mwstate.measurements[i] = mwstate.real_answers[i]
-                                          + rand(Laplace(0.0, mwstate.scale))
+            mwstate.measurements[i] = (mwstate.real_answers[i]
+                                          + rand(Laplace(0.0, mwstate.scale)))
             update!(mwstate)
         end
         verbose ? print(t, "\t", maximum_error(mwstate), "\t", time, "\n") : nothing
