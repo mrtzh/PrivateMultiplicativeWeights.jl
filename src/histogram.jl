@@ -73,7 +73,7 @@ function Histogram(table::Tabular)
         num = 0
         x = vec(table.data[:, i])
         for i = 1:d
-            num += x[d-i+1] * 2^(i-1)
+            num += convert(Int64, x[d-i+1]) * 2^(i-1)
         end
         histogram[num+1] += 1.0
     end
