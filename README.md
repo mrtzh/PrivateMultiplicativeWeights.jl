@@ -15,15 +15,13 @@ Open a Julia prompt and call: `Pkg.clone("https://github.com/mrtzh/PrivateMultip
 * Scalable heuristic for large number of data attributes
 * Easy-to-use interfaces for custom query sets and data representations
 
-## Usage
+## Example
 For the sake of illustration, we create a random data set with hidden correlations. Columns correspond to data points.
 ```
 d, n = 20, 1000
 data_matrix = rand(0:1, d ,n)
 data_matrix[3, :] = data_matrix[1, :] .* data_matrix[2, :]
 ```
-
-### Histograms
 
 We can run MWEM to produce synthetic data accurate for 1st, 2nd, 3rd order marginals of the source data.
 ```
@@ -32,14 +30,17 @@ mw = mwem(Parities(d, 3), Tabular(data_matrix))
 ```
 This will convert the data to its explicit histogram representation of size 2^d and may not be useful when d is large. See section below on factored histograms for a scalable alternative.
 
-We can tweak various parameters:
+## Parameters
+
+We can set various parameters:
 ```
 mw = mwem(Parities(d, 3),
           Tabular(data_matrix),
-          epsilon=0.5,
+          epsilon=1.0,
           iterations=10,
           repetitions=10,
-          smart=false)
+          verbose=false,
+          noisy_init=false)
 ```
 Parameters:
 
@@ -61,11 +62,21 @@ maximum_error(mw), mean_squared_error(mw)
 ```
 Note that these statistics are *not* differentially private.
 
-#### Custom query sets
+## Custom query sets
 
-You can define custom query workloads by using `HistogramQueries(query_matrix)` instead of `Parities(d, 3)`. Here `query matrix` is an `N x k` matrix specifying the query set in its Histogram representation, `N` is the histogram length and `k` is the `k` is the number of queries.
+### Query matrices
 
-To build query sets with your own implicit representations, create a sub-type of `Query` and `Queries`, respectively. See `interface.jl`.
+You can define custom query workloads by using `HistogramQueries(query_matrix)`
+instead of `Parities(d, 3)`. Here `query matrix` is an `N x k` matrix specifying
+the query set in its Histogram representation, `N` is the histogram length and
+`k` is the `k` is the number of queries.
+
+### Custom query types
+
+To build query sets with your own implicit representations, sub-type
+`Query` and `Queries`. Implement the functions specified in `src/interface.jl`.
+
+See `src/parities.jl` for an example.
 
 ### Factored histograms
 When the histogram representation is too large, try using factored histograms. Factored histograms maintain a product distribution over clusters of attributes of the data. Each component is represented using a single histogram. Components are merged as it becomes necessary. This often allows to scale up MWEM by orders of magnitude.
