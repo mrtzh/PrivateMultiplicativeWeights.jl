@@ -19,8 +19,8 @@ Open a Julia prompt and call: `Pkg.clone("https://github.com/mrtzh/PrivateMultip
 For the sake of illustration, we create a random data set with hidden correlations. Columns correspond to data points.
 ```
 d, n = 20, 1000
-data_matrix = rand(0:1,d,n)
-data_matrix[3,:] = data_matrix[1,:] .* data_matrix[2,:]
+data_matrix = rand(0:1, d ,n)
+data_matrix[3, :] = data_matrix[1, :] .* data_matrix[2, :]
 ```
 
 ### Histograms
@@ -34,16 +34,27 @@ This will convert the data to its explicit histogram representation of size 2^d 
 
 We can tweak various parameters:
 ```
-mw = mwem(Parities(d,3),Tabular(data_matrix),epsilon=0.5,iterations=10,repetitions=10,smart=false)
+mw = mwem(Parities(d, 3),
+          Tabular(data_matrix),
+          epsilon=0.5,
+          iterations=10,
+          repetitions=10,
+          smart=false)
 ```
 Parameters:
 
 | Name | Default | Description |
 | ---- | ------- | ----------- |
-| `epsilon` | `1.0` |  privacy parameter |
-| `iterations` | `10` | number of iterations |
-| `repetitions`| `5` | controls how often MWEM cycles through previously measured queries per iteration |
-| `smart` | `false` | smart histogram initalization through noise addition. When `smart` is set to false, the initialization is uniform. |
+| `epsilon` | `1.0` | Privacy parameter per iteration. Each iteration of MWEM is
+`epsilon`-differentially private. Total privacy guarantees follow via
+composition theorems. |
+| `iterations` | `10` | Number of iterations of MWEM. Each iteration corresponds
+to selecting one query via the exponential mechanism, evaluating the query on
+the data, and updating the internal state. |
+| `repetitions`| `10` | Number of times MWEM cycles through previously measured
+queries per iteration. This has no additional privacy cost. |
+| `noisy_init` | `false` | Histogram initalization through noise addition. When
+`noisy_init` is set to false, the initialization is uniform. |
 | `verbose` | `false` | print timing and error statistics per iteration (information is not differentially private)
 
 We can convert synthetic data in histogram representation to matrix tabular representation.

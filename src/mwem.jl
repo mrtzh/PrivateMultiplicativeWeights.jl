@@ -28,11 +28,17 @@ end
 #
 # MWEM algorithm: Iterate noisy max + multiplicative weights update
 #
-function mwem(queries::Queries, data::Data;
-             epsilon=1.0, iterations=10, repetitions = 5, verbose = false, smart = false)
+function mwem(queries::Queries,
+              data::Data;
+              epsilon=1.0, 
+              iterations=10,
+              repetitions=10,
+              verbose=false,
+              noisy_init=false)
 
     # Initialization
-    time = @elapsed mwstate = initialize(queries,data,(epsilon,iterations,repetitions,smart))
+    parameters = (epsilon,iterations,repetitions,noisy_init)
+    time = @elapsed mwstate = initialize(queries, data, parameters)
     verbose ? print("Iter.\t Max error\t\t time (sec)\n") : nothing
     verbose ? print("0\t",maximum_error(mwstate),"\t",time,"\n") : nothing
 
