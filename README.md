@@ -28,7 +28,24 @@ We can run MWEM to produce synthetic data accurate for 1st, 2nd, 3rd order margi
 using PrivateMultiplicativeWeights
 mw = mwem(Parities(d, 3), Tabular(data_matrix))
 ```
-This will convert the data to its explicit histogram representation of size 2^d and may not be useful when d is large. See section below on factored histograms for a scalable alternative.
+This will convert the data to its explicit histogram representation of size 2^d
+and may not be useful when d is large. See section on factored histograms
+for an alternative when the dimension d is large.
+
+### Convert histograms to matrices
+
+We can convert synthetic data in histogram representation to a tabular 
+(matrix) representation.
+```
+table = Tabular(mw.synthetic, n)
+```
+
+### Compute error of approximation
+Compute error achieved by MWEM:
+```
+maximum_error(mw), mean_squared_error(mw)
+```
+Note that these statistics are *not* differentially private.
 
 ## Parameters
 
@@ -52,17 +69,10 @@ Parameters:
 | `noisy_init` | `false` | Histogram initalization through noise addition. When `noisy_init` is set to false, the initialization is uniform. |
 | `verbose` | `false` | print timing and error statistics per iteration (information is not differentially private)
 
-We can convert synthetic data in histogram representation to matrix tabular representation.
-```
-table = Tabular(mw.synthetic, n)
-```
-Compute error achieved by MWEM:
-```
-maximum_error(mw), mean_squared_error(mw)
-```
-Note that these statistics are *not* differentially private.
 
 ## Custom query sets
+
+There are two ways to define custom query sets.
 
 ### Query matrices
 
@@ -78,8 +88,12 @@ To build query sets with your own implicit representations, sub-type
 
 See `src/parities.jl` for an example.
 
-### Factored histograms
-When the histogram representation is too large, try using factored histograms. Factored histograms maintain a product distribution over clusters of attributes of the data. Each component is represented using a single histogram. Components are merged as it becomes necessary. This often allows to scale up MWEM by orders of magnitude.
+## Factored histograms
+When the histogram representation is too large, try using factored histograms.
+Factored histograms maintain a product distribution over clusters of attributes
+of the data. Each component is represented using a single histogram. Components
+are merged as it becomes necessary. This often allows to scale up MWEM by orders
+of magnitude.  
 ```
 d, n = 100, 1000
 data_matrix = rand(0:1, d, n)
