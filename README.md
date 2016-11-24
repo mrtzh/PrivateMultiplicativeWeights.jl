@@ -45,8 +45,7 @@ Parameters:
 
 | Name | Default | Description |
 | ---- | ------- | ----------- |
-| `epsilon` | `1.0` | Privacy parameter per iteration. Each iteration of MWEM is `epsilon`-differentially private. Total privacy guarantees follow via
-composition theorems. |
+| `epsilon` | `1.0` | Privacy parameter per iteration. Each iteration of MWEM is `epsilon`-differentially private. Total privacy guarantees follow via composition theorems. |
 | `iterations` | `10` | Number of iterations of MWEM. Each iteration corresponds to selecting one query via the exponential mechanism, evaluating the query on the data, and updating the internal state. |
 | `repetitions`| `10` | Number of times MWEM cycles through previously measured queries per iteration. This has no additional privacy cost. |
 | `noisy_init` | `false` | Histogram initalization through noise addition. When `noisy_init` is set to false, the initialization is uniform. |
