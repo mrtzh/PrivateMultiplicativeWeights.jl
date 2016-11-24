@@ -15,6 +15,6 @@ using Base.Test
 # test our hadamard basis vectors agree with Hadamard module
 for j = 0:10
     for i = j:10
-        @test MWEM.hadamard_basis_vector(j,i) == Hadamard.hadamard(2^i)[:,j+1]
+        @test PrivateMultiplicativeWeights.hadamard_basis_vector(j,i) == Hadamard.hadamard(2^i)[:,j+1]
     end
 end
