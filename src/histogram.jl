@@ -1,4 +1,6 @@
-# data and queries are represented as vectors in the histogram space
+# Histogram represents the data as a vector where each coordinate corresponds
+# to one element of the data universe. This is the default representation for
+# MWEM.
 
 type Histogram <: Data
     weights::Vector
@@ -29,8 +31,8 @@ function normalize!(h::Histogram)
     h
 end
 
-# if error is > 0, we want to increase weight on positive elements of queries[query]
-# and decrease weight on negative elements. Magnitude of error determines step size.
+# if error is > 0, increase weight on positive elements of queries[query] and 
+# decrease weight on negative elements. Magnitude of error determines step size.
 function update!(q::HistogramQuery, h::Histogram, error::Float64)
     @simd for j = 1:length(h.weights)
         @inbounds h.weights[j] *= exp(error * q.weights[j] / 2.0)
@@ -39,15 +41,16 @@ end
 
 function histogram_initialize(queries::Queries, table::Tabular, parameters)
     d, n  = size(table.data)
-    epsilon, iterations, repetitions, smart = parameters
+    epsilon, iterations, repetitions, noisy_init = parameters
     N = 2^d
     real = Histogram(table)
-    if smart
+    if noisy_init
         # spend half of epsilon on histogram initialization
         weights = Array(Float64, N)
         noise = rand(Laplace(0.0, 1.0/(n*epsilon)), N)
         @simd for i = 1:N
-             @inbounds weights[i] = max(real.weights[i]+noise[i]-1.0/(e*n*epsilon), 0.0)
+             @inbounds weights[i] = 
+                 max(real.weights[i] + noise[i] - 1.0/(e*n*epsilon), 0.0)
         end
         weights /= sum(weights)
         synthetic = Histogram(0.5 * weights + 0.5/N)
@@ -57,8 +60,8 @@ function histogram_initialize(queries::Queries, table::Tabular, parameters)
     end
     real_answers = evaluate(queries, real)
     scale = 2*iterations/(epsilon*n)
-    mwstate = MWState(real, synthetic, queries, real_answers, Dict{Int, Float}(), scale, repetitions)
-    mwstate
+    MWState(real, synthetic, queries, real_answers, Dict{Int, Float}(),
+                                                    scale, repetitions)
 end
 
 function initialize(queries::HistogramQueries, table::Tabular, parameters)
