@@ -86,8 +86,8 @@ end
 # convert histogram to 0/1 data matrix
 function Tabular(histogram::Histogram, n::Int)
     N = length(histogram.weights)
-    d = int(log(2, length(histogram.weights)))
-    idx = wsample([0:N-1], histogram.weights, n)
+    d = convert(Int64, log(2, N))
+    idx = wsample(collect(0:N-1), histogram.weights, n)
     data_matrix = zeros(d, n)
     for i = 1:n
         data_matrix[:, i] = reverse(digits(idx[i], 2, d))
