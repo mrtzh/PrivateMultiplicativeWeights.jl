@@ -1,4 +1,6 @@
-# data is represented as a product of histograms on disjoint attributes
+# FactorHistogram represents the data as a product of histograms on disjoint 
+# attributes. This corresponds to a distribution where variables in different
+# factors are independent.
 
 type Factor
     attributes::Array{Int, 1}
@@ -32,7 +34,8 @@ function get_parent(d::FactorHistogram, attributes::Array{Int, 1})
 end
 
 function merge_factors(f::Factor, g::Factor)
-    Factor(append!(f.attributes, g.attributes), Histogram(kron(f.histogram.weights, g.histogram.weights)))
+    Factor(append!(f.attributes, g.attributes),
+           Histogram(kron(f.histogram.weights, g.histogram.weights)))
 end
 
 function merge_components!(q::FactorHistogramQuery, d::FactorHistogram)
@@ -40,7 +43,8 @@ function merge_components!(q::FactorHistogramQuery, d::FactorHistogram)
     for i in 2:length(attributes(q))
         current_index = d.lookup[attributes(q)[i]]
         if current_index != parent_index
-            d.factors[parent_index] = merge_factors(d.factors[parent_index], d.factors[current_index])
+            d.factors[parent_index] = merge_factors(d.factors[parent_index],
+                                                    d.factors[current_index])
             for a in d.factors[current_index].attributes
                 d.lookup[a] = parent_index
             end
@@ -77,10 +81,11 @@ end
 # normalize happens inside update!
 normalize!(h::FactorHistogram) = h
 
-function initialize(queries::FactorHistogramQueries, table::Tabular, parameters)
+function initialize(queries::FactorHistogramQueries, table::Tabular,
+                                                     parameters)
     d, n = size(table.data)
     epsilon, iterations, repetitions = parameters
-    components = [ Factor([i], Histogram([0.5, 0.5])) for i = 1:d ]
+    components = [Factor([i], Histogram([0.5, 0.5])) for i = 1:d]
     lookup = Dict{Int, Int}()
     for i = 1:d
         lookup[i] = i
