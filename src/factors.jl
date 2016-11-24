@@ -81,13 +81,13 @@ function initialize(queries::FactorHistogramQueries,table::Tabular,parameters)
     d, n = size(table.data)
     epsilon, iterations, repetitions = parameters
     components = [ Factor([i],Histogram([0.5,0.5])) for i = 1:d ]
-    lookup = (Int => Int)[]
+    lookup = Dict{Int,Int}()
     for i = 1:d
         lookup[i] = i
     end
     synthetic = FactorHistogram(components,lookup)
     real_answers = evaluate(queries,table)
     scale = 2*iterations/(epsilon*n)
-    mwstate = MWState(table,synthetic,queries,real_answers,(Int=>Float)[],scale,repetitions)
+    mwstate = MWState(table,synthetic,queries,real_answers,Dict{Int,Float}(),scale,repetitions)
     mwstate
 end

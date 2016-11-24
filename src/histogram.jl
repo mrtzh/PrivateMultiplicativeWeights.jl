@@ -49,7 +49,7 @@ function histogram_initialize(queries::Queries,table::Tabular,parameters)
     end
     real_answers = evaluate(queries,real)
     scale = 2*iterations/(epsilon*n)
-    mwstate = MWState(real,synthetic,queries,real_answers,(Int=>Float)[],scale,repetitions)
+    mwstate = MWState(real,synthetic,queries,real_answers,Dict{Int,Float}(),scale,repetitions)
     mwstate
 end
 
