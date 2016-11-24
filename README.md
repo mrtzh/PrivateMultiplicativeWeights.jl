@@ -28,7 +28,7 @@ data_matrix[3, :] = data_matrix[1, :] .* data_matrix[2, :]
 We can run MWEM to produce synthetic data accurate for 1st, 2nd, 3rd order marginals of the source data.
 ```
 using PrivateMultiplicativeWeights
-mw = mwem(Parities(d,3),Tabular(data_matrix))
+mw = mwem(Parities(d, 3), Tabular(data_matrix))
 ```
 This will convert the data to its explicit histogram representation of size 2^d and may not be useful when d is large. See section below on factored histograms for a scalable alternative.
 
@@ -63,7 +63,7 @@ Note that these statistics are *not* differentially private.
 
 #### Custom query sets
 
-You can define custom query workloads by using `HistogramQueries(query_matrix)` instead of `Parities(d,3)`. Here `query matrix` is an `N x k` matrix specifying the query set in its Histogram representation, `N` is the histogram length and `k` is the `k` is the number of queries.
+You can define custom query workloads by using `HistogramQueries(query_matrix)` instead of `Parities(d, 3)`. Here `query matrix` is an `N x k` matrix specifying the query set in its Histogram representation, `N` is the histogram length and `k` is the `k` is the number of queries.
 
 To build query sets with your own implicit representations, create a sub-type of `Query` and `Queries`, respectively. See `interface.jl`.
 
@@ -71,9 +71,9 @@ To build query sets with your own implicit representations, create a sub-type of
 When the histogram representation is too large, try using factored histograms. Factored histograms maintain a product distribution over clusters of attributes of the data. Each component is represented using a single histogram. Components are merged as it becomes necessary. This often allows to scale up MWEM by orders of magnitude.
 ```
 d, n = 100, 1000
-data_matrix = rand(0:1,d,n)
-data_matrix[3,:] = data_matrix[1,:] .* data_matrix[2,:]
-mw = mwem(FactorParities(d,3),Tabular(data_matrix))
+data_matrix = rand(0:1, d, n)
+data_matrix[3, :] = data_matrix[1, :] .* data_matrix[2, :]
+mw = mwem(FactorParities(d, 3), Tabular(data_matrix))
 ```
 
 Also see `examples.jl`.
