@@ -72,26 +72,18 @@ Parameters:
 | `noisy_init` | `false` | Histogram initalization through noise addition. When `noisy_init` is set to false, the initialization is uniform. |
 | `verbose` | `false` | print timing and error statistics per iteration (information is not differentially private)
 
+## Data representations
 
-## Custom query sets
+### Histogram representation
 
-There are two ways to define custom query sets.
-
-### Query matrices
-
-You can define custom query workloads by using `HistogramQueries(query_matrix)`
-instead of `Parities(d, 3)`. Here `query matrix` is an `N x k` matrix specifying
-the query set in its Histogram representation, `N` is the histogram length and
-`k` is the `k` is the number of queries.
-
-### Custom query types
-
-To build query sets with your own implicit representations, sub-type
-`Query` and `Queries`. Implement the functions specified in `src/interface.jl`.
-
-See `src/parities.jl` for an example.
+By default, MWEM works with the histogram representation of a data sets. This
+means that the data is represented by a vector whose length is equal to the size
+of domain. For example, data consisting of `d` binary attributes would be
+converted to an array of length `2^d`. MWEM needs to store and array of this
+length in main memory, which is often the computational bottleneck.
 
 ## Factored histograms
+
 When the histogram representation is too large, try using factored histograms.
 Factored histograms maintain a product distribution over clusters of attributes
 of the data. Each component is represented using a single histogram. Components
@@ -106,6 +98,35 @@ mw = mwem(FactorParities(d, 3), Tabular(data_matrix))
 
 Also see `examples.jl`.
 
+## Query representations
+
+There are two ways to define custom query sets.
+
+### Histogram queries
+
+Histogram queries are linear functions in the histogram representation of the
+data.  You can define custom query workloads by using
+`HistogramQueries(query_matrix)` instead of `Parities(d, 3)`. Here `query
+matrix` is an `N x k` matrix specifying the query set in its Histogram
+representation, `N` is the histogram length and `k` is the `k` is the number of
+queries.
+
+### Custom query types
+
+To build query sets with your own implicit representations, sub-type
+`Query` and `Queries`. Implement the functions specified in `src/interface.jl`.
+
+See `src/parities.jl` for an example.
+
+## Contributing to this package
+
+There are many ways to contribute to this repository:
+
+* Experiments with actual data
+* Additional query sets
+* Additional tests and debugging
+* Additional documentation
+
 ## Citing this package
 
 The MWEM algorithm was presented in the following paper:
@@ -113,8 +134,7 @@ The MWEM algorithm was presented in the following paper:
 @inproceedings{HLM12,
 	author = "Moritz Hardt and Katrina Ligett and Frank McSherry",
 	title = "A simple and practical algorithm for differentially-private data release",
-    title = {Proc.\ 26th Neural Information Processing Systems (NIPS)},
-    booktitle = {Proc.\ 26th Neural Information Processing Systems (NIPS)},
-    year = {2012},
+  booktitle = {Proc.\ 26th Neural Information Processing Systems (NIPS)},
+  year = {2012},
 }
 ```
