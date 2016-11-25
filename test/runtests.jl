@@ -3,8 +3,8 @@ using Hadamard
 using Base.Test
 
 # test histogram transform
-@test Histogram(Tabular(int(zeros(1,10)))).weights == [1.0,0.0]
-@test Histogram(Tabular(int(ones(1,10)))).weights == [0.0,1.0]
+@test Histogram(Tabular(convert(Array{Int64, 2}, zeros(1,10)))).weights == [1.0,0.0]
+@test Histogram(Tabular(convert(Array{Int64, 2}, ones(1,10)))).weights == [0.0,1.0]
 @test Histogram(Tabular([1 0; 0 1])).weights == [0.0,0.5,0.5,0]
 @test Histogram(Tabular([1 0 1; 0 1 0])).weights == [0.0,1.0,2.0,0]/3.0
 @test Histogram(Tabular([1 0 1 1 ; 0 1 0 1])).weights == [0.0,1.0,2.0,1.0]/4.0
