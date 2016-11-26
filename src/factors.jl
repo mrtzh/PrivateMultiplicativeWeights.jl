@@ -1,12 +1,15 @@
-# FactorHistogram represents the data as a product of histograms on disjoint 
-# attributes. This corresponds to a distribution where variables in different
-# factors are independent.
-
 type Factor
     attributes::Array{Int, 1}
     histogram::Histogram
 end
 
+"""
+    FactorHistogram
+
+FactorHistogram represents the data as a product of histograms on disjoint 
+attributes. This corresponds to a distribution where variables in different
+factors are independent.
+"""
 type FactorHistogram <: Data
     factors::Array{Factor, 1}
     lookup::Dict{Int, Int}
@@ -81,8 +84,7 @@ end
 # normalize happens inside update!
 normalize!(h::FactorHistogram) = h
 
-function initialize(queries::FactorHistogramQueries, table::Tabular,
-                                                     parameters)
+function initialize(queries::FactorHistogramQueries, table::Tabular, parameters)
     d, n = size(table.data)
     epsilon, iterations, repetitions = parameters
     components = [Factor([i], Histogram([0.5, 0.5])) for i = 1:d]
@@ -93,9 +95,7 @@ function initialize(queries::FactorHistogramQueries, table::Tabular,
     synthetic = FactorHistogram(components, lookup)
     real_answers = evaluate(queries, table)
     scale = 2*iterations/(epsilon*n)
-    mwstate = MWState(table, synthetic, queries, real_answers,
-                                                 Dict{Int, Float}(),
-                                                 scale,
-                                                 repetitions)
-    mwstate
+    MWState(table, synthetic, queries, real_answers, Dict{Int, Float64}(),
+                                                     scale,
+                                                     repetitions)
 end

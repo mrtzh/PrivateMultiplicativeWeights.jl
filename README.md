@@ -118,13 +118,28 @@ To build query sets with your own implicit representations, sub-type
 
 See `src/parities.jl` for an example.
 
+### Available query sets
+
+- **Parities**(d, k)
+
+  Parities of `k` out of `d` attributes. This corresponds to approximating
+  `k`-way marginals of the original data.
+
+- **FactorParities**(d, k)
+
+  Parities of `k` out of `d` attributes for factored histogram representation.
+
+- **RangeQueries**(N)
+
+  Range queries corresponding to all interval queries over a histogram of length `N`.
+
 ## Contributing to this package
 
 There are many ways to contribute to this repository:
 
-* Experiments with actual data
+* Experiments
 * Additional query sets
-* Additional tests and debugging
+* Additional tests, debugging, optimization
 * Additional documentation
 
 ## Citing this package
@@ -132,9 +147,9 @@ There are many ways to contribute to this repository:
 The MWEM algorithm was presented in the following paper:
 ```
 @inproceedings{HLM12,
-	author = "Moritz Hardt and Katrina Ligett and Frank McSherry",
-	title = "A simple and practical algorithm for differentially-private data release",
-  booktitle = {Proc.\ 26th Neural Information Processing Systems (NIPS)},
+  author = "Moritz Hardt and Katrina Ligett and Frank McSherry",
+  title = "A simple and practical algorithm for differentially-private data release",
+  booktitle = {Proc.\ $26$th Neural Information Processing Systems (NIPS)},
   year = {2012},
 }
 ```

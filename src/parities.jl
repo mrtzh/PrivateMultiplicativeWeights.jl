@@ -1,11 +1,20 @@
-# Implementation of parity queries using Fast Hadamard Walsh Transform
+"""
+    Parities
 
+Implementation of parity queries using Fast Hadamard Walsh Transform and Gosper
+iteration.
+"""
 type Parities <: Queries
     dimension::Int
     order::Int
     idx::Array{Int, 1}
 end
 
+"""
+    hadamard_basis_vector(index, dimension)
+
+Returns hadamard basis vector given by `index`.
+"""
 function hadamard_basis_vector(index::Int, dimension::Int)
     hadamard = Array(Float64, 1 << dimension)
     hadamard[1] = 1.0
@@ -36,16 +45,16 @@ function evaluate(queries::Parities, h::Histogram)
     2^queries.dimension * fwht_natural(h.weights)[queries.idx]
 end
 
-function initialize(queries::Parities, table::Tabular, parameters)
-    histogram_initialize(queries, table, parameters)
-end
-
-# factored implementation
 
 type FactorParity <: FactorHistogramQuery
     attributes::Array{Int, 1}
 end
 
+"""
+    FactorParities
+
+Implementation of parity queries over factored histograms.
+"""
 type FactorParities <: FactorHistogramQueries
     queries::Array{FactorParity, 1}
 end
@@ -67,12 +76,14 @@ end
 function FactorParities(dimension, order)
     qs = FactorParity[]
     for k = 1:order
-        append!(qs, [ FactorParity(s) for s = subsets([1:dimension], k)])
+        append!(qs, [FactorParity(s) for s = subsets(collect(1:dimension), k)])
     end
     FactorParities(qs)
 end
 
-parity(x::Vector, attributes::Array{Int64, 1}) = (-1.0)^sum(x[attributes])
+function parity(x::Array{Float64, 1}, attributes::Array{Int64, 1})
+    (-1.0)^sum(x[attributes])
+end
 
 function evaluate(q::FactorParity, table::Tabular)
     s = 0.0

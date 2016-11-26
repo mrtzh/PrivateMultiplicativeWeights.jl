@@ -3,15 +3,20 @@
 # MWEM.
 
 type Histogram <: Data
-    weights::Vector
+    weights::Array{Float64, 1}
+    num_samples::Int64
+end
+
+function Histogram(weights::Array{Float64, 1})
+    Histogram(weights, 0)
 end
 
 type HistogramQuery <: Query
-    weights::Vector
+    weights::Array{Float64, 1}
 end
 
 type HistogramQueries <: Queries
-    queries::Matrix
+    queries::Array{Float64, 2}
 end
 
 function get(queries::HistogramQueries, i::QueryIndex)
@@ -39,36 +44,41 @@ function update!(q::HistogramQuery, h::Histogram, error::Float64)
     end
 end
 
-function histogram_initialize(queries::Queries, table::Tabular, parameters)
-    d, n  = size(table.data)
+function initialize(queries::Queries, data::Histogram, parameters)
+    data = normalize!(data)
+    histogram_length = length(data.weights)
+    num_samples = data.num_samples
     epsilon, iterations, repetitions, noisy_init = parameters
-    N = 2^d
-    real = Histogram(table)
     if noisy_init
         # spend half of epsilon on histogram initialization
-        weights = Array(Float64, N)
-        noise = rand(Laplace(0.0, 1.0/(n*epsilon)), N)
-        @simd for i = 1:N
+        weights = Array(Float64, histogram_length)
+        noise = rand(Laplace(0.0, 1.0/(epsilon*num_samples)), histogram_length)
+        @simd for i = 1:histogram_length
              @inbounds weights[i] = 
-                 max(real.weights[i] + noise[i] - 1.0/(e*n*epsilon), 0.0)
+                 max(data.weights[i] + noise[i] - 1.0/(e*n*epsilon), 0.0)
         end
         weights /= sum(weights)
-        synthetic = Histogram(0.5 * weights + 0.5/N)
-        epsilon = 0.5*epsilon
+        synthetic = Histogram(0.5 * weights + 0.5/histogram_length)
+        epsilon *= 0.5
     else
-        synthetic = Histogram(ones(N)/N)
+        synthetic = Histogram(ones(histogram_length)/histogram_length)
     end
-    real_answers = evaluate(queries, real)
-    scale = 2*iterations/(epsilon*n)
-    MWState(real, synthetic, queries, real_answers, Dict{Int, Float}(),
+    real_answers = evaluate(queries, data)
+    scale = 2*iterations/(epsilon*num_samples)
+    MWState(data, synthetic, queries, real_answers, Dict{Int, Float64}(),
                                                     scale, repetitions)
 end
 
-function initialize(queries::HistogramQueries, table::Tabular, parameters)
-    histogram_initialize(queries, table, parameters)
+function initialize(queries::Queries, data::Tabular, parameters)
+    initialize(queries, Histogram(data), parameters)
 end
 
-# convert 0/1 data matrix to its histogram representation
+
+"""
+    Histogram(table)
+
+Create histogram representation from tabular data.
+"""
 function Histogram(table::Tabular)
     d, n = size(table.data)
     histogram = zeros(2^d)
@@ -80,10 +90,14 @@ function Histogram(table::Tabular)
         end
         histogram[num+1] += 1.0
     end
-    normalize!(Histogram(histogram))
+    normalize!(Histogram(histogram, n))
 end
 
-# convert histogram to 0/1 data matrix
+"""
+    Tabular(histogram, n)
+
+Create tabular data by sampling n times weighted by histogram.
+"""
 function Tabular(histogram::Histogram, n::Int)
     N = length(histogram.weights)
     d = convert(Int64, log(2, N))

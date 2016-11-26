@@ -1,15 +1,22 @@
+"""
+    PrivateMultiplicativeWeights
+
+Algorithm for creating differentially private synthetic data.
+"""
 module PrivateMultiplicativeWeights
 
 using
-    Hadamard,
     Distributions.Laplace,
-    Distributions.wsample
+    Distributions.wsample,
+    Hadamard,
+    Iterators.subsets
 
 export
     mwem,
     Tabular,
     Histogram,
     HistogramQueries,
+    RangeQueries,
     Parities,
     FactorParities,
     maximum_error,
@@ -20,8 +27,9 @@ import
 
 include("interface.jl")
 include("histogram.jl")
+include("rangequeries.jl")
 include("factors.jl")
-include("iterators.jl")
+include("gosper.jl")
 include("parities.jl")
 include("error.jl")
 include("mwem.jl")

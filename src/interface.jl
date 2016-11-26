@@ -1,7 +1,3 @@
-typealias Float Float64
-typealias Vector Array{Float, 1}
-typealias Matrix Array{Float, 2}
-
 abstract Data
 abstract Query
 abstract Queries
@@ -12,14 +8,14 @@ type MWState
     real::Data
     synthetic::Data
     queries::Queries
-    real_answers::Vector
-    measurements::Dict{Int, Float}
-    scale::Float
+    real_answers::Array{Float64, 1}
+    measurements::Dict{Int, Float64}
+    scale::Float64
     repetitions::Int
 end
 
 type Tabular <: Data
-    data::Matrix
+    data::Array{Float64, 2}
 end
 
 function get(qs::Queries, ::QueryIndex)

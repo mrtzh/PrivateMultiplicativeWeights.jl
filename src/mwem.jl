@@ -31,7 +31,7 @@ function update!(mwstate::MWState)
 end
 
 """
-    mwem
+    mwem(queries, data[, epsilon, repetitions, verbose, noisy_init])
 
 Private Multiplicative Weights (MWEM) repeatedly selects largest error query
 and performs multiplicative weights update.
@@ -55,18 +55,25 @@ function mwem(queries::Queries,
     # Initialization
     parameters = (epsilon, iterations, repetitions, noisy_init)
     time = @elapsed mwstate = initialize(queries, data, parameters)
-    verbose ? print("Iter.\t Max error\t\t time (sec)\n") : nothing
-    verbose ? print("0\t", maximum_error(mwstate), "\t", time, "\n") : nothing
+
+    if verbose
+        error = maximum_error(mwstate)
+        print("Iter.\t Max error\t time (sec)\n")
+        @printf("0\t %.3f\t\t %.3f\n", error, time)
+    end
 
     # Iterations
     for t = 1:iterations
         time = @elapsed begin
-            i = noisy_max(mwstate)
-            mwstate.measurements[i] = (mwstate.real_answers[i]
-                                          + rand(Laplace(0.0, mwstate.scale)))
+            query_id = noisy_max(mwstate)
+            mwstate.measurements[query_id] = 
+              mwstate.real_answers[query_id] + rand(Laplace(0.0, mwstate.scale))
             update!(mwstate)
         end
-        verbose ? print(t, "\t", maximum_error(mwstate), "\t", time, "\n") : nothing
+        if verbose
+            error = maximum_error(mwstate)
+            @printf("%d\t %.3f\t\t %.3f\n", t, error, time)
+        end
     end
 
     mwstate
