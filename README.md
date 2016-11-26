@@ -160,3 +160,4 @@ The MWEM algorithm was presented in the following paper:
 Status](https://travis-ci.org/mrtzh/PrivateMultiplicativeWeights.jl.svg?branch=master)](https://travis-ci.org/mrtzh/PrivateMultiplicativeWeights.jl)
 
 
+\n
