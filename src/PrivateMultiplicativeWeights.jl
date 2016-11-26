@@ -1,8 +1,3 @@
-"""
-    PrivateMultiplicativeWeights
-
-Algorithm for creating differentially private synthetic data.
-"""
 module PrivateMultiplicativeWeights
 
 using
@@ -34,5 +29,11 @@ include("parities.jl")
 include("error.jl")
 include("mwem.jl")
 
+"""
+    PrivateMultiplicativeWeights
+
+A simple and practical algorithm for differentially private data analysis.
+"""
+PrivateMultiplicativeWeights
 
 end # module

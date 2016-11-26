@@ -18,26 +18,57 @@ type Tabular <: Data
     data::Array{Float64, 2}
 end
 
-function get(qs::Queries, ::QueryIndex)
+"""
+    get(qs::Queries, qindex::QueryIndex)
+
+Returns Query corresponding to given QueryIndex.
+"""
+function get(qs::Queries, qindex::QueryIndex)
     throw("`get` not implemented for `$(typeof(qs))`.")
 end
 
+"""
+    evaluate(q::Query, d::Data)
+
+Returns float value of Query evaluated on Data.
+"""
 function evaluate(q::Query, d::Data)
     throw("`evaluate` not implemented for `$(typeof(q))`, `$(typeof(d))`.")
 end
 
+"""
+    evaluate(q::Queries, d::Data)
+
+Returns vector of floats corresponding to Queries evaluated on Data.
+"""
 function evaluate(qs::Queries, d::Data)
     throw("`evaluate` not implemented for `$(typeof(qs))`, `$(typeof(d))`.")
 end
 
+"""
+    evaluate(q::Queries, d::Data)
+
+Returns MWState initialization for given queries, data, and parameters.
+"""
 function initialize(qs::Queries, d::Data, parameters)
     throw("`initialize` not implemented for `$(typeof(qs))`, `$(typeof(d))`.")
 end
 
+"""
+    update!(q::Query, d::Data, error::Float64)
+
+Performs multiplicative weights update of synthetic data `d` for given query `q`
+and error value `error`.
+"""
 function update!(q::Query, d::Data, error::Float64)
     throw("`update!` not implemented for `$(typeof(q))`, `$(typeof(d))`.")
 end
 
+"""
+   normalize!(d::Data)
+
+Normalizes data.
+"""   
 function normalize!(d::Data)
     throw("`normalize!` not implemented for `$(typeof(d))`.")
 end

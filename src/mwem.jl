@@ -12,22 +12,14 @@ end
 
 
 """
-    update!(mwstate::MWState)
+    update!(mwstate::MWState, qindex::QueryIndex)
 
-Perform multiplicative weights update.
+Perform multiplicative weights update with query given by `qindex`.
 """
-function update!(mwstate::MWState)
-    # repeatedly update queries that were already measured before
-    for i = 1:mwstate.repetitions
-        for qindex in keys(mwstate.measurements)
-            query = get(mwstate.queries, qindex)
-            error = (mwstate.measurements[qindex] 
-                        - evaluate(query, mwstate.synthetic))
-            update!(query, mwstate.synthetic, error)
-        end
-    end
-    normalize!(mwstate.synthetic)
-    mwstate
+function update!(mwstate::MWState, qindex::QueryIndex)
+    query = get(mwstate.queries, qindex)
+    error = (mwstate.measurements[qindex] - evaluate(query, mwstate.synthetic))
+    update!(query, mwstate.synthetic, error)
 end
 
 """
@@ -65,11 +57,20 @@ function mwem(queries::Queries,
     # Iterations
     for t = 1:iterations
         time = @elapsed begin
-            query_id = noisy_max(mwstate)
-            mwstate.measurements[query_id] = 
-              mwstate.real_answers[query_id] + rand(Laplace(0.0, mwstate.scale))
-            update!(mwstate)
+            qindex = noisy_max(mwstate)
+            mwstate.measurements[qindex] = 
+              mwstate.real_answers[qindex] + rand(Laplace(0.0, mwstate.scale))
+            update!(mwstate, qindex)
+
+            # repeatedly update on previously measured queries in random order
+            for i = 1:mwstate.repetitions
+                for qindex in shuffle(collect(keys(mwstate.measurements)))
+                    update!(mwstate, qindex)
+                end
+            end
+           #update!(mwstate)
         end
+
         if verbose
             error = maximum_error(mwstate)
             @printf("%d\t %.3f\t\t %.3f\n", t, error, time)

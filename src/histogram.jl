@@ -1,7 +1,9 @@
-# Histogram represents the data as a vector where each coordinate corresponds
-# to one element of the data universe. This is the default representation for
-# MWEM.
+"""
+    Histogram
 
+Histogram represents the data as a vector where each coordinate corresponds to
+one element of the data universe. This is the default representation for MWEM.
+"""
 type Histogram <: Data
     weights::Array{Float64, 1}
     num_samples::Int64
@@ -42,6 +44,7 @@ function update!(q::HistogramQuery, h::Histogram, error::Float64)
     @simd for j = 1:length(h.weights)
         @inbounds h.weights[j] *= exp(error * q.weights[j] / 2.0)
     end
+    normalize!(h)
 end
 
 function initialize(queries::Queries, data::Histogram, parameters)
@@ -50,7 +53,7 @@ function initialize(queries::Queries, data::Histogram, parameters)
     num_samples = data.num_samples
     epsilon, iterations, repetitions, noisy_init = parameters
     if noisy_init
-        # spend half of epsilon on histogram initialization
+        # Noisy init incurs an additional `epsilon` privacy cost
         weights = Array(Float64, histogram_length)
         noise = rand(Laplace(0.0, 1.0/(epsilon*num_samples)), histogram_length)
         @simd for i = 1:histogram_length
@@ -59,7 +62,6 @@ function initialize(queries::Queries, data::Histogram, parameters)
         end
         weights /= sum(weights)
         synthetic = Histogram(0.5 * weights + 0.5/histogram_length)
-        epsilon *= 0.5
     else
         synthetic = Histogram(ones(histogram_length)/histogram_length)
     end
