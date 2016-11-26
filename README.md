@@ -52,17 +52,17 @@ Note that these statistics are *not* differentially private.
 
 ## Parameters
 
-We can set various parameters:
+Parameters can be set flexibly with the `MWParameters` constructor:
 ```
 mw = mwem(Parities(d, 3),
           Tabular(data_matrix),
-          epsilon=1.0,
-          iterations=10,
-          repetitions=10,
-          verbose=false,
-          noisy_init=false)
+          MWParameters(epsilon=1.0,
+                       iterations=10,
+                       repetitions=10,
+                       verbose=false,
+                       noisy_init=false))
 ```
-Parameters:
+Available parameters:
 
 | Name | Default | Description |
 | ---- | ------- | ----------- |
@@ -71,6 +71,9 @@ Parameters:
 | `repetitions`| `10` | Number of times MWEM cycles through previously measured queries per iteration. This has no additional privacy cost. |
 | `noisy_init` | `false` | Histogram initalization through noise addition.  This incurs an additional `epsilon` privacy cost.  When `noisy_init` is set to false, the initialization is uniform.  |
 | `verbose` | `false` | print timing and error statistics per iteration (information is not differentially private)
+
+The function `MWParameters` accepts any subset of parameters, e.g.,
+`MWParameter(epsilon=0.5, iterations=5)`.
 
 ## Data representations
 
@@ -138,7 +141,7 @@ See `src/parities.jl` for an example.
 There are many ways to contribute to this repository:
 
 * Experiments
-* Additional query sets
+* Additional query sets (e.g., two-dimensional range queries)
 * Additional tests, debugging, optimization
 * Additional documentation
 

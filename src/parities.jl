@@ -45,6 +45,10 @@ function evaluate(queries::Parities, h::Histogram)
     2^queries.dimension * fwht_natural(h.weights)[queries.idx]
 end
 
+function initialize(queries::Parities, data::Tabular, ps::MWParameters)
+    initialize(queries, Histogram(data), ps)
+end
+
 
 type FactorParity <: FactorHistogramQuery
     attributes::Array{Int, 1}

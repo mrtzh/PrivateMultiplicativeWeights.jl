@@ -84,9 +84,8 @@ end
 # normalize happens inside update!
 normalize!(h::FactorHistogram) = h
 
-function initialize(queries::FactorHistogramQueries, table::Tabular, parameters)
+function initialize(queries::FactorHistogramQueries, table::Tabular, ps::MWParameters)
     d, n = size(table.data)
-    epsilon, iterations, repetitions = parameters
     components = [Factor([i], Histogram([0.5, 0.5])) for i = 1:d]
     lookup = Dict{Int, Int}()
     for i = 1:d
@@ -94,8 +93,6 @@ function initialize(queries::FactorHistogramQueries, table::Tabular, parameters)
     end
     synthetic = FactorHistogram(components, lookup)
     real_answers = evaluate(queries, table)
-    scale = 2*iterations/(epsilon*n)
-    MWState(table, synthetic, queries, real_answers, Dict{Int, Float64}(),
-                                                     scale,
-                                                     repetitions)
+    scale = 2.0/(ps.epsilon*n)
+    MWState(table, synthetic, queries, real_answers, Dict{Int, Float64}(), scale)
 end

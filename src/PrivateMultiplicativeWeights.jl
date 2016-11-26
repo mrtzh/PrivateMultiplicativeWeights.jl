@@ -8,6 +8,7 @@ using
 
 export
     mwem,
+    MWParameters,
     Tabular,
     Histogram,
     HistogramQueries,

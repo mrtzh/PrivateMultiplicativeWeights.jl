@@ -2,7 +2,9 @@ abstract Data
 abstract Query
 abstract Queries
 
+
 typealias QueryIndex Int
+
 
 type MWState
     real::Data
@@ -11,12 +13,22 @@ type MWState
     real_answers::Array{Float64, 1}
     measurements::Dict{Int, Float64}
     scale::Float64
-    repetitions::Int
 end
+
+
+type MWParameters
+   epsilon::Float64
+   iterations::Int64
+   repetitions::Int64
+   noisy_init::Bool
+   verbose::Bool
+end
+
 
 type Tabular <: Data
     data::Array{Float64, 2}
 end
+
 
 """
     get(qs::Queries, qindex::QueryIndex)
@@ -27,6 +39,7 @@ function get(qs::Queries, qindex::QueryIndex)
     throw("`get` not implemented for `$(typeof(qs))`.")
 end
 
+
 """
     evaluate(q::Query, d::Data)
 
@@ -36,8 +49,9 @@ function evaluate(q::Query, d::Data)
     throw("`evaluate` not implemented for `$(typeof(q))`, `$(typeof(d))`.")
 end
 
+
 """
-    evaluate(q::Queries, d::Data)
+    evaluate(qs::Queries, d::Data)
 
 Returns vector of floats corresponding to Queries evaluated on Data.
 """
@@ -45,14 +59,16 @@ function evaluate(qs::Queries, d::Data)
     throw("`evaluate` not implemented for `$(typeof(qs))`, `$(typeof(d))`.")
 end
 
+
 """
-    evaluate(q::Queries, d::Data)
+    initialize(qs::Queries, d::Data, ps::MWParameters)
 
 Returns MWState initialization for given queries, data, and parameters.
 """
-function initialize(qs::Queries, d::Data, parameters)
+function initialize(qs::Queries, d::Data, ps::MWParameters)
     throw("`initialize` not implemented for `$(typeof(qs))`, `$(typeof(d))`.")
 end
+
 
 """
     update!(q::Query, d::Data, error::Float64)
@@ -63,6 +79,7 @@ and error value `error`.
 function update!(q::Query, d::Data, error::Float64)
     throw("`update!` not implemented for `$(typeof(q))`, `$(typeof(d))`.")
 end
+
 
 """
    normalize!(d::Data)

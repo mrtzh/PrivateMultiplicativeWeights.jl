@@ -27,5 +27,5 @@ data = Histogram([0.0, 1.0, 0.0], 1000)
 # test parities
 srand(1234)
 data = Tabular([0 0 1 1; 0 0 1 1; 0 1 0 1])
-@test maximum_error(mwem(Parities(3, 2), data, epsilon=100.0)) < 0.1
-@test maximum_error(mwem(FactorParities(3, 2), data, epsilon=100.0)) < 0.1
+@test maximum_error(mwem(Parities(3, 2), data, MWParameters(epsilon=100.0))) < 0.1
+@test maximum_error(mwem(FactorParities(3, 2), data, MWParameters(epsilon=100.0))) < 0.1

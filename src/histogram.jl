@@ -47,18 +47,17 @@ function update!(q::HistogramQuery, h::Histogram, error::Float64)
     normalize!(h)
 end
 
-function initialize(queries::Queries, data::Histogram, parameters)
+function initialize(queries::Queries, data::Histogram, ps::MWParameters)
     data = normalize!(data)
     histogram_length = length(data.weights)
     num_samples = data.num_samples
-    epsilon, iterations, repetitions, noisy_init = parameters
-    if noisy_init
+    if ps.noisy_init
         # Noisy init incurs an additional `epsilon` privacy cost
         weights = Array(Float64, histogram_length)
-        noise = rand(Laplace(0.0, 1.0/(epsilon*num_samples)), histogram_length)
+        noise = rand(Laplace(0.0, 1.0/(ps.epsilon*num_samples)), histogram_length)
         @simd for i = 1:histogram_length
              @inbounds weights[i] = 
-                 max(data.weights[i] + noise[i] - 1.0/(e*n*epsilon), 0.0)
+                 max(data.weights[i] + noise[i] - 1.0/(e*n*ps.epsilon), 0.0)
         end
         weights /= sum(weights)
         synthetic = Histogram(0.5 * weights + 0.5/histogram_length)
@@ -66,13 +65,12 @@ function initialize(queries::Queries, data::Histogram, parameters)
         synthetic = Histogram(ones(histogram_length)/histogram_length)
     end
     real_answers = evaluate(queries, data)
-    scale = 2*iterations/(epsilon*num_samples)
-    MWState(data, synthetic, queries, real_answers, Dict{Int, Float64}(),
-                                                    scale, repetitions)
+    scale = 2.0/(ps.epsilon*num_samples)
+    MWState(data, synthetic, queries, real_answers, Dict{Int, Float64}(), scale)
 end
 
-function initialize(queries::Queries, data::Tabular, parameters)
-    initialize(queries, Histogram(data), parameters)
+function initialize(queries::HistogramQueries, data::Tabular, ps::MWParameters)
+    initialize(queries, Histogram(data), ps)
 end
 
 
