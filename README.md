@@ -18,8 +18,22 @@ Pkg.clone("https://github.com/mrtzh/PrivateMultiplicativeWeights.jl.git")
 * Scalable heuristic for large number of data attributes
 * Easy-to-use interfaces for custom query sets and data representations
 
-## Example
-For the sake of illustration, we create a random data set with hidden correlations. Columns correspond to data points.
+## Examples
+
+### Histogram approximations
+
+![Histogram approximation](/examples/histogram.png)
+
+Check out [`histograms.ipynb`](/examples/histograms.ipynb) for details on how to
+use the algorithm to compute differentially private histogram approximations. 
+
+### Marginal approximations
+
+The package can also be used to create synthetic data that approximates the
+lower order marginals of a data set with binary features.  For the sake of
+illustration, we create a random data set with hidden correlations. Columns
+correspond to data points.  
+
 ```
 d, n = 20, 1000
 data_matrix = rand(0:1, d ,n)

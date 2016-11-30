@@ -56,8 +56,8 @@ function mwem(queries::Queries, data::Data, ps=MWParameters())
     time = @elapsed mwstate = initialize(queries, data, ps)
 
     if ps.verbose
-        error = maximum_error(mwstate)
-        print("Iter.\t Max error\t time (sec)\n")
+        error = mean_squared_error(mwstate)
+        print("Iter.\t Mean sq err\t time (sec)\n")
         @printf("0\t %.3f\t\t %.3f\n", error, time)
     end
 
@@ -81,7 +81,7 @@ function mwem(queries::Queries, data::Data, ps=MWParameters())
         end
 
         if ps.verbose
-            error = maximum_error(mwstate)
+            error = mean_squared_error(mwstate)
             @printf("%d\t %.3f\t\t %.3f\n", t, error, time)
         end
     end
