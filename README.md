@@ -22,7 +22,7 @@ Pkg.clone("https://github.com/mrtzh/PrivateMultiplicativeWeights.jl.git")
 
 ### Histogram approximations
 
-![Histogram approximation](/examples/histogram.png)
+![Histogram approximation](https://github.com/mrtzh/PrivateMultiplicativeWeights.jl/blob/master/examples/histograms.png?raw=true)
 
 Check out [`histograms.ipynb`](/examples/histograms.ipynb) for details on how to
 use the algorithm to compute differentially private histogram approximations. 
