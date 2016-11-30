@@ -1,6 +1,6 @@
 # PrivateMultiplicativeWeights.jl
 
-A simple and practical algorithm for differentially private data release.
+This package implements `MWEM`, a simple and practical algorithm for differentially private data release.
 
 MIT Licensed. See `LICENSE.md`.
 
