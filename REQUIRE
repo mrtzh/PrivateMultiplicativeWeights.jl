@@ -6,3 +6,4 @@ LinearAlgebra
 IterTools
 Statistics
 Distributed
+DataFrames
