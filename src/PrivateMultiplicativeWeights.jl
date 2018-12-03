@@ -9,7 +9,7 @@ using
     Random,
     IterTools,
     Statistics,
-    Distributed,
+    Distributed
 
 export
     mwem,
