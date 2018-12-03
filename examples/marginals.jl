@@ -15,7 +15,7 @@ end
 function range_queries()
     histogram = vcat(zeros(100), ones(100), zeros(100))
     data = Histogram(histogram, 100)
-    mwem(RangeQueries(300), data, MWParameters(repetitions=100, verbose=true))
+    mwem(SeriesRangeQueries(300), data, MWParameters(repetitions=100, verbose=true))
 end
 
 print("Elapsed time: ", @elapsed marginals())

@@ -1,4 +1,8 @@
-type Factor
+abstract type FactorHistogramQuery <: Query end
+
+abstract type FactorHistogramQueries <: Queries end
+
+mutable struct Factor
     attributes::Array{Int, 1}
     histogram::Histogram
 end
@@ -6,18 +10,14 @@ end
 """
     FactorHistogram
 
-FactorHistogram represents the data as a product of histograms on disjoint 
+FactorHistogram represents the data as a product of histograms on disjoint
 attributes. This corresponds to a distribution where variables in different
 factors are independent.
 """
-type FactorHistogram <: Data
+struct FactorHistogram <: Data
     factors::Array{Factor, 1}
     lookup::Dict{Int, Int}
 end
-
-abstract FactorHistogramQuery <: Query
-
-abstract FactorHistogramQueries <: Queries
 
 function attributes(q::FactorHistogramQuery)
     throw("`attributes` not implemented for `$(typeof(q))`.")

@@ -9,13 +9,18 @@ Returns MWParameters with default settings where not specified.
 * `repetitions::Integer=10`: Repeatedly update with previously selected queries.
 * `noisy_init::Boolean=false`: Initialize with noisy histogram if true.
 * `verbose::Boolean=false`: Print timing and error information (not private)
+* `init_budget=0.05: fraction of the epsilon for the noisy initialization
+* `noisy_max_budget: fraction of the badget from every step for for the noisy max
 """
 function MWParameters(; epsilon=1.0,
                         iterations=10,
                         repetitions=10,
                         noisy_init=false,
-                        verbose=false)
-    MWParameters(epsilon, iterations, repetitions, noisy_init, verbose)
+                        verbose=false,
+                        init_budget=0.05,
+                        noisy_max_budget=0.5
+                        )
+    MWParameters(epsilon, iterations, repetitions, noisy_init, verbose, init_budget, noisy_max_budget)
 end
 
 
@@ -24,11 +29,11 @@ end
 
 Select index of query with largest error after noise addition.
 """
-function noisy_max(mwstate::MWState)
+function noisy_max(mwstate::MWState, noisy_max_budget::Float64)
     diffs = mwstate.real_answers - evaluate(mwstate.queries, mwstate.synthetic)
-    # do not select previously measured queries
-    diffs[collect(keys(mwstate.measurements))] = 0.0
-    indmax(abs(diffs) + rand(Laplace(0.0, mwstate.scale), length(diffs)))
+    diffs[collect(keys(mwstate.measurements))] .= 0.0
+    real_index = argmax(abs.(diffs) + rand(Laplace(0.0, mwstate.scale/noisy_max_budget), length(diffs)))
+    real_index
 end
 
 
@@ -39,7 +44,7 @@ Perform multiplicative weights update with query given by `qindex`.
 """
 function update!(mwstate::MWState, qindex::QueryIndex)
     query = get(mwstate.queries, qindex)
-    error = (mwstate.measurements[qindex] - evaluate(query, mwstate.synthetic))
+    error = mwstate.measurements[qindex] - evaluate(query, mwstate.synthetic)
     update!(query, mwstate.synthetic, error)
 end
 
@@ -65,9 +70,9 @@ function mwem(queries::Queries, data::Data, ps=MWParameters())
     for t = 1:ps.iterations
         time = @elapsed begin
             # select query via noisy max
-            qindex = noisy_max(mwstate)
-            mwstate.measurements[qindex] = 
-              mwstate.real_answers[qindex] + rand(Laplace(0.0, mwstate.scale))
+            qindex = noisy_max(mwstate, ps.noisy_max_budget)
+            mwstate.measurements[qindex] =
+              mwstate.real_answers[qindex] + rand(Laplace(0.0, mwstate.scale/(1-ps.noisy_max_budget)))
 
             # update synthetic data approximation
             update!(mwstate, qindex)
@@ -81,8 +86,10 @@ function mwem(queries::Queries, data::Data, ps=MWParameters())
         end
 
         if ps.verbose
-            error = mean_squared_error(mwstate)
-            @printf("%d\t %.3f\t\t %.3f\n", t, error, time)
+            error_mean = mean_squared_error(mwstate)
+            error_max = maximum_error(mwstate)
+            @printf("itr: %d\t mean_error: %.3f\t\t %.3f\n", t, error_mean, time)
+            @printf("itr: %d\t max_error: %.3f\t\t %.3f\n", t, error_max, time)
         end
     end
 

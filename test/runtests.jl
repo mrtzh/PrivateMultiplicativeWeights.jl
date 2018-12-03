@@ -1,6 +1,7 @@
 using PrivateMultiplicativeWeights
 using Hadamard
-using Base.Test
+using Test
+using Random
 
 # test histogram transform
 @test Histogram(Tabular(convert(Array{Int64, 2}, zeros(1,10)))).weights == [1.0, 0.0]
@@ -20,12 +21,12 @@ for j = 0:10
 end
 
 # test range queries
-srand(1234)
+Random.seed!(1234)
 data = Histogram([0.0, 1.0, 0.0], 1000)
-@test maximum_error(mwem(RangeQueries(3), data)) < 0.1
+@test maximum_error(mwem(SeriesRangeQueries(3), data)) < 0.1
 
 # test parities
-srand(1234)
+Random.seed!(1234)
 data = Tabular([0 0 1 1; 0 0 1 1; 0 1 0 1])
 @test maximum_error(mwem(Parities(3, 2), data, MWParameters(epsilon=100.0))) < 0.1
 @test maximum_error(mwem(FactorParities(3, 2), data, MWParameters(epsilon=100.0))) < 0.1

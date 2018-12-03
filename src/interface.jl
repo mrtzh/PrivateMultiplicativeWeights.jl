@@ -1,12 +1,13 @@
-abstract Data
-abstract Query
-abstract Queries
+abstract type Data end
+abstract type Query end
+abstract type Queries end
 
 
-typealias QueryIndex Int
+const QueryIndex = Int
+const Interval = Tuple{Int64, Int64}
 
 
-type MWState
+struct MWState
     real::Data
     synthetic::Data
     queries::Queries
@@ -16,16 +17,18 @@ type MWState
 end
 
 
-type MWParameters
-   epsilon::Float64
-   iterations::Int64
-   repetitions::Int64
-   noisy_init::Bool
-   verbose::Bool
+struct MWParameters
+    epsilon::Float64
+    iterations::Int64
+    repetitions::Int64
+    noisy_init::Bool
+    verbose::Bool
+    init_budget::Float64
+    noisy_max_budget::Float64
 end
 
 
-type Tabular <: Data
+struct Tabular <: Data
     data::Array{Float64, 2}
 end
 
@@ -85,7 +88,7 @@ end
    normalize!(d::Data)
 
 Normalizes data.
-"""   
+"""
 function normalize!(d::Data)
     throw("`normalize!` not implemented for `$(typeof(d))`.")
 end

@@ -74,16 +74,20 @@ mw = mwem(Parities(d, 3),
                        iterations=10,
                        repetitions=10,
                        verbose=false,
-                       noisy_init=false))
+                       noisy_init=false,
+                       init_budget=0.05,
+                       noisy_max_budget=0.5))
 ```
 Available parameters:
 
 | Name | Default | Description |
 | ---- | ------- | ----------- |
-| `epsilon` | `1.0` | Privacy parameter per iteration. Each iteration of MWEM is `epsilon`-differentially private. Total privacy guarantees follow via composition theorems. |
+| `epsilon` | `1.0` | Privacy parameter for the algorithm. MWEM is `epsilon`-differentially private. Each iteration of MWEM is `epsilon`/`iterations`-differentially private. Total privacy guarantees follow via composition theorems.|
 | `iterations` | `10` | Number of iterations of MWEM. Each iteration corresponds to selecting one query via the exponential mechanism, evaluating the query on the data, and updating the internal state. |
 | `repetitions`| `10` | Number of times MWEM cycles through previously measured queries per iteration. This has no additional privacy cost. |
-| `noisy_init` | `false` | Histogram initalization through noise addition.  This incurs an additional `epsilon` privacy cost.  When `noisy_init` is set to false, the initialization is uniform.  |
+| `noisy_init` | `false` | This requires part of the `epsilon` privacy cost.  When `noisy_init` is set to false, the initialization is uniform.  |
+| `init_budget` | `0.5` | In case the `noisy_init` flag is set to true, this flag decide what fraction of the `epsilon` privacy cost will be given for the noisy initialization. When `noisy_init` is set to false, all the budget will be used by the iterations. |
+| `noisy_max_budget` | `0.05` | Decise what fraction from the `epsion` privacy badget of every iteration will go to the "noisy max" step. (the rest is for the Exponential Mechanism)  |
 | `verbose` | `false` | print timing and error statistics per iteration (information is not differentially private)
 
 The function `MWParameters` accepts any subset of parameters, e.g.,
@@ -146,9 +150,14 @@ See `src/parities.jl` for an example.
 
   Parities of `k` out of `d` attributes for factored histogram representation.
 
-- **RangeQueries**(N)
+- **SeriesRangeQueries**(N)
 
   Range queries corresponding to all interval queries over a histogram of length `N`.
+  
+  - *SeriesRangeQueries**(Intervals)
+
+  Range queries over histogram with length N, corresponding to intervals = {Interval1, Interval2, ...}
+  where Interval = (i, j) so that 1 <= i <= j <= N.
 
 ## Contributing to this package
 
