@@ -53,7 +53,6 @@ end
 
 Private Multiplicative Weights (MWEM) repeatedly selects largest error query
 and performs multiplicative weights update.
-
 """
 function mwem(queries::Queries, data::Data, ps=MWParameters())
 

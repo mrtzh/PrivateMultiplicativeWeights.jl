@@ -68,7 +68,7 @@ function initialize(queries::Queries, data::Histogram, ps::MWParameters)
         synthetic = Histogram(weights/histogram_length)
     end
     real_answers = evaluate(queries, data)
-    scale = (ps.iterations)/(ps.epsilon*num_samples)
+    scale = 2.0/(ps.epsilon*num_samples)
     MWState(data, synthetic, queries, real_answers, Dict{Int, Float64}(), scale)
 end
 
