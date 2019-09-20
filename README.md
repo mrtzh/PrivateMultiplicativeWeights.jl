@@ -9,7 +9,7 @@ MIT Licensed. See `LICENSE.md`.
 Install required packages, then open a Julia prompt and call: 
 ```
 using Pkg
-Pkg.clone("https://github.com/mrtzh/PrivateMultiplicativeWeights.jl.git")
+Pkg.add("PrivateMultiplicativeWeights")
 ```
 
 ## Main Features
