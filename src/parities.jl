@@ -4,8 +4,8 @@
 Implementation of parity queries using Fast Hadamard Walsh Transform and Gosper
 iteration.
 
-Releasing privacy prserving marginals for contingency table.
-The measurments in this case are not the marginals, but the fourier coefficients of the contingency table,
+Releasing privacy-preserving marginals for a contingency table.
+The measurements in this case are not the marginals, but the Fourier coefficients of the contingency table,
 that are sufficient for recovering the marginals.
 
 Details can be found in:
@@ -15,7 +15,7 @@ Privacy, accuracy, and consistency too: a holistic solution to contingency table
 struct Parities <: Queries
     dimension::Int
     order::Int
-    idx::Array{Int, 1}
+    idx::Vector{Int}
 end
 
 """
@@ -23,7 +23,9 @@ end
 
 Returns hadamard basis vector given by `index`.
 """
-function hadamard_basis_vector(index::Int, dimension::Int)
+function hadamard_basis_vector(index::Integer, dimension::Integer)
+    0 <= dimension <= 62 || throw(ArgumentError("dimension must be between 0 and 62"))
+    0 <= index < (1 << dimension) || throw(ArgumentError("index is outside the Hadamard basis"))
     hadamard = zeros(Float64, 1 << dimension)
     hadamard[1] = 1.0
     for i = 0:dimension-1
@@ -36,16 +38,17 @@ function hadamard_basis_vector(index::Int, dimension::Int)
 end
 
 """
-return the downward closure of all the incides of the k-way marginals, of dimension d.
+Return the downward closure of all indices of the `k`-way marginals in dimension `d`.
 
 # Example:
     k = 2, d = 4
     k-way indices= [0011, 0101, 0110, 1001, 1010, 1100]
     downward_closure(0011) = [0000, 0001, 0010, 0011]
 """
-function complete_way_marginals_indices(k::Int64, d::Int64)
-    
-    idx = Set(zeros(Int64, 0))
+function complete_way_marginals_indices(k::Integer, d::Integer)
+    1 <= k <= d <= 62 || throw(ArgumentError("order and dimension must satisfy 1 <= order <= dimension <= 62"))
+
+    idx = Set{Int}()
     
     for s = gosper(d, k)
         for alpha in BinaryItr(d, s)
@@ -58,8 +61,9 @@ function complete_way_marginals_indices(k::Int64, d::Int64)
 end
 
 
-function Parities(dimension, order)
-    Parities(dimension, order, complete_way_marginals_indices(order, dimension))
+function Parities(dimension::Integer, order::Integer)
+    1 <= order <= dimension <= 62 || throw(ArgumentError("order and dimension must satisfy 1 <= order <= dimension <= 62"))
+    Parities(Int(dimension), Int(order), complete_way_marginals_indices(order, dimension))
 end
 
 function get(queries::Parities, i::Int)
@@ -71,10 +75,18 @@ evaluate the measurements of the linear queries defined by
 queries.idx (the indices needed for calculating the marginals of the contingency table)
 """
 function evaluate(queries::Parities, h::Histogram)
+    length(h.weights) == 1 << queries.dimension || throw(DimensionMismatch("histogram length must equal 2^dimension"))
     2^queries.dimension * fwht_natural(h.weights)[queries.idx]
 end
 
+"""
+    fourierCoefficients(queries::Parities, histogram)
+
+Return all Walsh–Hadamard/Fourier coefficients of `histogram` using the
+dimension specified by `queries`.
+"""
 function fourierCoefficients(queries::Parities, h::Histogram)
+    length(h.weights) == 1 << queries.dimension || throw(DimensionMismatch("histogram length must equal 2^dimension"))
     2^queries.dimension * fwht_natural(h.weights)
 end
 
@@ -82,14 +94,15 @@ end
 Calculate the marginal C_beta : R^(2^d) -> R^(2^(norm1(beta))), for beta in {0,1}^d, 
 of the fourier basis vector in the location alpha
 """
-function fourierMarginal(dimension::Int64, beta::Int64, alpha::Int64)
-
-    @assert beta & alpha == alpha
+function fourierMarginal(dimension::Integer, beta::Integer, alpha::Integer)
+    0 <= dimension <= 62 || throw(ArgumentError("dimension must be between 0 and 62"))
+    0 <= beta < (1 << dimension) || throw(ArgumentError("beta is outside the data domain"))
+    0 <= alpha < (1 << dimension) || throw(ArgumentError("alpha is outside the data domain"))
+    beta & alpha == alpha || throw(ArgumentError("alpha must be a subset of beta"))
 
     beta_norm1, beta_indices = norm_1_with_indices(beta)
-    alpha_norm1, alpha_indices = norm_1_with_indices(alpha)
 
-    marginal = zeros(Int64, 2^beta_norm1)
+    marginal = zeros(Float64, 2^beta_norm1)
 
     inverse_beta = setdiff(collect(1:dimension), beta_indices)
 
@@ -104,11 +117,12 @@ end
 Calculate the marginal C_beta : R^(2^d) -> R^(2^(norm1(beta))), for beta in {0,1}^d, 
 of the contingencyTable (represent as histogram).
 """
-function calculateMarginal(queries::Parities, h::Histogram, beta::Int64)
+function calculateMarginal(queries::Parities, h::Histogram, beta::Integer)
+    0 <= beta < (1 << queries.dimension) || throw(ArgumentError("beta is outside the data domain"))
 
-    beta_norm1, beta_indices = norm_1_with_indices(beta)
+    beta_norm1, _ = norm_1_with_indices(beta)
 
-    marginal = zeros(Int64, 2^beta_norm1)
+    marginal = zeros(Float64, 2^beta_norm1)
 
     coefficients = fourierCoefficients(queries, h)
 
@@ -119,15 +133,15 @@ function calculateMarginal(queries::Parities, h::Histogram, beta::Int64)
     marginal/(2^queries.dimension)
 end
 
+"""
+    Marginals(queries::Parities, histogram)
+
+Reconstruct every exact-order marginal requested by `queries`. The returned
+vector contains one probability vector for each size-`queries.order` subset of
+attributes, in Gosper-iterator order.
+"""
 function Marginals(queries::Parities, h::Histogram)
-
-    marginals = []
-
-    for beta in queries.idx
-        push!(marginals, calculateMarginal(queries, h, beta))
-    end
-
-    marginals
+    [calculateMarginal(queries, h, beta) for beta in gosper(queries.dimension, queries.order)]
 end
 
 function initialize(queries::Parities, data::Tabular, ps::MWParameters)
@@ -135,7 +149,14 @@ function initialize(queries::Parities, data::Tabular, ps::MWParameters)
 end
 
 struct FactorParity <: FactorHistogramQuery
-    attributes::Array{Int, 1}
+    attributes::Vector{Int}
+
+    function FactorParity(attributes::AbstractVector{<:Integer})
+        isempty(attributes) && throw(ArgumentError("a factor parity must contain at least one attribute"))
+        all(>(0), attributes) || throw(ArgumentError("attribute indices must be positive"))
+        allunique(attributes) || throw(ArgumentError("attribute indices must be unique"))
+        new(Int.(attributes))
+    end
 end
 
 """
@@ -144,14 +165,14 @@ end
 Implementation of parity queries over factored histograms.
 """
 struct FactorParities <: FactorHistogramQueries
-    queries::Array{FactorParity, 1}
+    queries::Vector{FactorParity}
 end
 
 attributes(q::FactorParity) = q.attributes
 default_value(q::FactorParity) = 0.0
 get(qs::FactorParities, i::QueryIndex) = qs.queries[i]
 
-function restrict(q::FactorParity, attributes::Array{Int, 1})
+function restrict(q::FactorParity, attributes::Vector{Int})
     idx = 0
     d = length(attributes)
     for a in q.attributes
@@ -161,7 +182,8 @@ function restrict(q::FactorParity, attributes::Array{Int, 1})
     HistogramQuery(hadamard_basis_vector(idx, d))
 end
 
-function FactorParities(dimension, order)
+function FactorParities(dimension::Integer, order::Integer)
+    1 <= order <= dimension || throw(ArgumentError("order and dimension must satisfy 1 <= order <= dimension"))
     qs = FactorParity[]
     for k = 1:order
         append!(qs, [FactorParity(s) for s = subsets(collect(1:dimension), k)])
@@ -169,7 +191,7 @@ function FactorParities(dimension, order)
     FactorParities(qs)
 end
 
-function parity(x::Array{Float64, 1}, attributes::Array{Int64, 1})
+function parity(x::AbstractVector{<:Real}, attributes::AbstractVector{<:Integer})
     (-1.0)^sum(x[attributes])
 end
 
@@ -193,4 +215,13 @@ end
 
 function evaluate(qs::FactorParities, d::FactorHistogram)
     [evaluate(q, d) for q in qs.queries]
+end
+
+function evaluate(q::FactorParity, d::FactorHistogram)
+    parent_indices = unique(d.lookup[a] for a in q.attributes)
+    mapreduce(*, parent_indices; init=1.0) do parent_index
+        factor = d.factors[parent_index]
+        local_attributes = [a for a in q.attributes if d.lookup[a] == parent_index]
+        evaluate(restrict(FactorParity(local_attributes), factor.attributes), factor.histogram)
+    end
 end

@@ -3,7 +3,7 @@ abstract type FactorHistogramQuery <: Query end
 abstract type FactorHistogramQueries <: Queries end
 
 mutable struct Factor
-    attributes::Array{Int, 1}
+    attributes::Vector{Int}
     histogram::Histogram
 end
 
@@ -15,7 +15,7 @@ attributes. This corresponds to a distribution where variables in different
 factors are independent.
 """
 struct FactorHistogram <: Data
-    factors::Array{Factor, 1}
+    factors::Vector{Factor}
     lookup::Dict{Int, Int}
 end
 
@@ -27,17 +27,19 @@ function default_value(q::FactorHistogramQuery)
     throw("`default_value` not implemented for `$(typeof(q))`.")
 end
 
-function restrict(q::FactorHistogramQuery, attributes::Array{Int, 1})
+function restrict(q::FactorHistogramQuery, attributes::Vector{Int})
     throw("`restrict` not implemented for `$(typeof(q))`.")
 end
 
-function get_parent(d::FactorHistogram, attributes::Array{Int, 1})
+function get_parent(d::FactorHistogram, attributes::Vector{Int})
+    isempty(attributes) && throw(ArgumentError("a factor query must reference at least one attribute"))
+    all(haskey(d.lookup, i) for i in attributes) || throw(ArgumentError("query references an unknown attribute"))
     factor_idxs = [d.lookup[i] for i in attributes]
     all(i -> i == factor_idxs[1], factor_idxs) ? factor_idxs[1] : 0
 end
 
 function merge_factors(f::Factor, g::Factor)
-    Factor(append!(f.attributes, g.attributes),
+    Factor(vcat(f.attributes, g.attributes),
            Histogram(kron(f.histogram.weights, g.histogram.weights)))
 end
 
@@ -86,6 +88,10 @@ normalize!(h::FactorHistogram) = h
 
 function initialize(queries::FactorHistogramQueries, table::Tabular, ps::MWParameters)
     d, n = size(table.data)
+    d > 0 || throw(ArgumentError("factored MWEM requires at least one attribute"))
+    n > 0 || throw(ArgumentError("factored MWEM requires at least one sample"))
+    all(x -> x == 0 || x == 1, table.data) || throw(ArgumentError("factored parity queries require binary tabular data"))
+    ps.noisy_init && throw(ArgumentError("noisy initialization is not supported for factored histograms"))
     components = [Factor([i], Histogram([0.5, 0.5])) for i = 1:d]
     lookup = Dict{Int, Int}()
     for i = 1:d

@@ -1,6 +1,6 @@
 struct GosperIterator
-    n::Int64
-    k::Int64
+    n::Int
+    k::Int
 end
 
 """
@@ -12,14 +12,14 @@ indicator vector of a subset of {1,...,n} of size k.
 Example:
    collect(gosper(3,2)) == [3, 5, 6]
 """
-function gosper(n::Int, k::Int)
-    @assert 0 < k <= n <= 62
-    return GosperIterator(n, k)
+function gosper(n::Integer, k::Integer)
+    0 < k <= n <= 62 || throw(ArgumentError("n and k must satisfy 0 < k <= n <= 62"))
+    return GosperIterator(Int(n), Int(k))
 end
 
-const GosperState = Tuple{Int64, Int64}
+const GosperState = Tuple{Int, Int}
 
-eltype(it::GosperIterator) = Int64
+eltype(::Type{GosperIterator}) = Int
 length(it::GosperIterator) = binomial(it.n, it.k)
 
 function start(it::GosperIterator)
@@ -43,35 +43,41 @@ end
 
 
 struct BinaryIndexIterator
-    d::Int64#  dimension
-    indices::Array{Int64}# indices of 1's
-    init_value::Int64# value that the iterator add the subnumbers to it
+    d::Int # dimension
+    indices::Vector{Int} # indices of 1's
+    init_value::Int # value that the iterator adds the subnumbers to
 end
 
 """
-For some a in {0,1}^d, that have 1's in the places "indices", iterate over all substes 
-of indices in "indices" and return the number of it's binary representation
+For some `a` in `{0,1}^d` with ones at `indices`, iterate over every subset of
+`indices` and return its binary representation.
 """
-function BinaryItr(d::Int64, indices::Array{Int64}, init_value::Int64 = 0)
-    @assert 0 < d <= 62
+function BinaryItr(d::Integer, indices::AbstractVector{<:Integer}, init_value::Integer=0)
+    0 < d <= 62 || throw(ArgumentError("dimension must be between 1 and 62"))
+    all(i -> 1 <= i <= d, indices) || throw(ArgumentError("indices must be within the dimension"))
+    allunique(indices) || throw(ArgumentError("indices must be unique"))
+    0 <= init_value < (1 << d) || throw(ArgumentError("init_value must be within the dimension"))
+    all(i -> init_value & (1 << (i - 1)) == 0, indices) ||
+        throw(ArgumentError("init_value must not overlap with indices"))
 
-    BinaryIndexIterator(d, indices, init_value)
+    BinaryIndexIterator(Int(d), Int.(indices), Int(init_value))
 end
 
 """
 Now the indices of the 1's are the number itself with those indices
 """
-function BinaryItr(d::Int64, indices::Int64, init_value::Int64 = 0)
-    @assert 0 < d <= 62
+function BinaryItr(d::Integer, indices::Integer, init_value::Integer=0)
+    0 < d <= 62 || throw(ArgumentError("dimension must be between 1 and 62"))
+    0 <= indices < (1 << d) || throw(ArgumentError("bit mask is outside the dimension"))
 
     _, arr_idx = norm_1_with_indices(indices)
 
-    BinaryIndexIterator(d, Array{Int64}(arr_idx), init_value)
+    BinaryItr(d, arr_idx, init_value)
 end
 
-const BinaryIndexState = Int64
+const BinaryIndexState = Int
 
-eltype(it::BinaryIndexIterator) = Int64
+eltype(::Type{BinaryIndexIterator}) = Int
 length(it::BinaryIndexIterator) = 2^(length(it.indices))
 
 function start(it::BinaryIndexIterator)
@@ -109,13 +115,12 @@ Calculate the norm1 of binary number (the number of 1's in the number).
 return: -norm1(alpha)
         -array with the indices of the 1's
 """
-function norm_1_with_indices(alpha::Int64)
-
-    @assert alpha >= 0
+function norm_1_with_indices(alpha::Integer)
+    alpha >= 0 || throw(ArgumentError("alpha must be nonnegative"))
 
     count = 0
     index = 1
-    idx = []
+    idx = Int[]
     while alpha > 0
         if alpha % 2 == 1
             count += 1
@@ -124,7 +129,7 @@ function norm_1_with_indices(alpha::Int64)
         alpha >>= 1
         index += 1
     end
-    count, Array{Int64}(idx)
+    count, idx
 end
 
 """
@@ -132,9 +137,8 @@ Calculate the norm1 of binary number (the number of 1's in the number).
 return: -norm1(alpha)
         -array with the indices of the 1's
 """
-function norm_1(alpha::Int64)
-
-    @assert alpha >= 0
+function norm_1(alpha::Integer)
+    alpha >= 0 || throw(ArgumentError("alpha must be nonnegative"))
 
     count = 0
     while alpha > 0
