@@ -25,13 +25,13 @@ params:
     domains:    the domain sizes of the columns.
 """
 function reverse_flatten_index(index, dim)
+    index >= 0 || throw(ArgumentError("index must be nonnegative"))
 
     new_index = zeros(Int64, length(dim))
 
     for (i,s) in enumerate(dim)
-        new_index[i] += index % s
-        index -= index % s
-        index /= s
+        new_index[i] = index % s
+        index = div(index, s)
     end
 
     new_index
@@ -109,12 +109,13 @@ function createHistogram(data::DataFrames.DataFrame, domains_elements::Array)
 
 end
 
-""""
+"""
 create histogram from a matrix of data.
 """
 function createHistogram(data::AbstractArray, domains_elements::Array)
 
-    createHistogram(DataFrame(samples), domains_elements)
+    ndims(data) == 2 || throw(ArgumentError("data must be a matrix"))
+    createHistogram(DataFrame(data, :auto), domains_elements)
 
 end
 
@@ -129,23 +130,21 @@ params:
 return:
     df: A dataframe containing the recreated dataset
 """
-function recreateDataset(histogram::Array{Float64, 1}, mappings::Array, domains_elements::Array)
+function recreateDataset(histogram::AbstractVector{<:Real}, mappings::Array, domains_elements::Array)
 
-    n = sum(histogram)
     d = length(domains_elements)
+    all(x -> isfinite(x) && x >= 0 && isinteger(x), histogram) ||
+        throw(ArgumentError("histogram entries must be finite, nonnegative integers"))
 
     domain_sizes = [length(domain)  for domain in domains_elements]
 
-    df = DataFrame()
-    for i=1:d
-        df[i] = []
-    end
+    df = DataFrame([Symbol("x$i") => Any[] for i in 1:d])
 
     for index = 1:length(histogram)
         domain_element_encoded = reverse_flatten_index(index-1, domain_sizes)
         domain_element = [mappings[j][1][domain_element_encoded[j]] for j=1:d]
-        for i=1:histogram[index]
-            push!(df, copy(domain_element))
+        for _ in 1:Int(histogram[index])
+            push!(df, Tuple(domain_element))
         end
     end
 
@@ -153,21 +152,23 @@ function recreateDataset(histogram::Array{Float64, 1}, mappings::Array, domains_
 
 end
 
-function readContingencyTable(data::DataFrames.DataFrame, dimension::Int64)
-
-    @assert length(size(data)) == 2
-
-    n,temp = size(data)
-
-    @assert temp == 2
-    @assert n > 0
+function readContingencyTable(data::DataFrames.DataFrame, dimension::Integer)
+    1 <= dimension <= 62 || throw(ArgumentError("dimension must be between 1 and 62"))
+    n, columns = size(data)
+    columns == 2 || throw(ArgumentError("the contingency table must have exactly two columns"))
+    n > 0 || throw(ArgumentError("the contingency table must not be empty"))
+    all(x -> x isa Integer && x >= 0, data[:, 1]) ||
+        throw(ArgumentError("encoded indices must be nonnegative integers"))
+    all(x -> x isa Real && isfinite(x), data[:, 2]) ||
+        throw(ArgumentError("counts must be finite real numbers"))
 
     hist = zeros(Float64, 2^dimension)
 
     for i in 1:n
-        dig = digits(data[[:1]][1][i], base = 10)
+        dig = digits(data[i, 1], base = 10)
         index = sum([dig[k]*2^(k-1) for k=1:length(dig)])
-        hist[index] += data[[:2]][1][i]
+        0 <= index < length(hist) || throw(ArgumentError("encoded index exceeds the requested dimension"))
+        hist[index + 1] += data[i, 2]
     end
 
     hist

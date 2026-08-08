@@ -4,14 +4,14 @@ abstract type Queries end
 
 
 const QueryIndex = Int
-const Interval = Tuple{Int64, Int64}
+const Interval = Tuple{Int, Int}
 
 
 struct MWState
     real::Data
     synthetic::Data
     queries::Queries
-    real_answers::Array{Float64, 1}
+    real_answers::Vector{Float64}
     measurements::Dict{Int, Float64}
     scale::Float64
 end
@@ -19,8 +19,8 @@ end
 
 struct MWParameters
     epsilon::Float64
-    iterations::Int64
-    repetitions::Int64
+    iterations::Int
+    repetitions::Int
     noisy_init::Bool
     verbose::Bool
     init_budget::Float64
@@ -28,8 +28,20 @@ struct MWParameters
 end
 
 
+"""
+    Tabular(data)
+
+Store a finite numeric matrix with attributes in rows and records in columns.
+Built-in histogram conversion and parity workloads require every value to be
+binary (`0` or `1`). The input is copied and converted to `Matrix{Float64}`.
+"""
 struct Tabular <: Data
-    data::Array{Float64, 2}
+    data::Matrix{Float64}
+
+    function Tabular(data::AbstractMatrix{<:Real})
+        all(isfinite, data) || throw(ArgumentError("tabular data must contain only finite values"))
+        new(Matrix{Float64}(data))
+    end
 end
 
 

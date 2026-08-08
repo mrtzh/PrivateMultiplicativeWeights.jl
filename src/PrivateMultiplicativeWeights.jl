@@ -7,9 +7,7 @@ using
     Hadamard,
     LinearAlgebra,
     Random,
-    IterTools,
-    Statistics,
-    Distributed
+    IterTools
 
 export
     mwem,
