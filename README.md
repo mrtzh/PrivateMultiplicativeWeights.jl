@@ -13,11 +13,12 @@ minor and the latest stable Julia 1.x release on Linux, macOS, and Windows.
 
 ## Installation
 
-Install the registered package from the Julia REPL:
+PrivateMultiplicativeWeights.jl is not currently registered in Julia's General
+registry. Install it directly from GitHub instead:
 
 ```julia
 using Pkg
-Pkg.add("PrivateMultiplicativeWeights")
+Pkg.add(url="https://github.com/mrtzh/PrivateMultiplicativeWeights.jl")
 ```
 
 Then load it with:
