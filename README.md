@@ -48,6 +48,13 @@ result = mwem(workload, data, parameters)
 result.synthetic.weights
 ```
 
+A representative histogram approximation looks like this:
+
+![Histogram approximation](examples/histograms.png)
+
+See the [histogram example notebook](examples/histograms.ipynb) for the full
+walkthrough.
+
 `result.synthetic` is the normalized synthetic representation. For explicit
 histograms, it can be sampled back into binary columns:
 
