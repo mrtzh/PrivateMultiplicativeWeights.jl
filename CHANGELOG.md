@@ -3,6 +3,14 @@
 All notable changes to PrivateMultiplicativeWeights.jl are documented here.
 The project follows semantic versioning.
 
+## Unreleased
+
+### Fixed
+
+- Modernized the histogram notebook for Julia 1.10 and newer, replaced its
+  obsolete Julia 0.5 and PyPlot setup, corrected endpoint binning, and updated
+  it to the current MWEM API.
+
 ## [0.2.0] - 2026-08-08
 
 This release revives the package for current Julia versions and repairs several
