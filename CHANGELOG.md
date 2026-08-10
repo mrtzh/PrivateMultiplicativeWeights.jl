@@ -11,6 +11,11 @@ The project follows semantic versioning.
   obsolete Julia 0.5 and PyPlot setup, corrected endpoint binning, and updated
   it to the current MWEM API.
 
+### Removed
+
+- Removed the undocumented legacy DataFrames accessibility helper and its
+  test-only DataFrames dependency.
+
 ## [0.2.0] - 2026-08-08
 
 This release revives the package for current Julia versions and repairs several
@@ -23,7 +28,7 @@ previously untested execution paths.
   histograms, binary tables, sample counts, and combinatorial iterators.
 - Regression coverage for histogram conversion, matrix and range workloads,
   Fourier marginals, factored histograms, noisy initialization, numerical
-  stability, error metrics, and the DataFrames helper example.
+  stability, and error metrics.
 - Cross-platform GitHub Actions CI for the minimum and latest supported Julia
   versions.
 
@@ -43,8 +48,6 @@ previously untested execution paths.
 - Corrected parity evaluation across independent factors.
 - Corrected KL divergence when the reference distribution has zero support and
   fixed total squared error calculation.
-- Updated the DataFrames helper example for current DataFrames APIs and fixed
-  matrix conversion, mixed-radix decoding, and contingency-table indexing.
 
 ### Changed
 
@@ -57,7 +60,6 @@ previously untested execution paths.
   exceptions instead of assertions, `NaN` results, or downstream bounds errors.
 - Factored workloads now reject `noisy_init=true`; older versions silently
   ignored the option.
-- DataFrames is test-only rather than a runtime dependency of the core package.
 - Obsolete Travis CI configuration was replaced by GitHub Actions.
 
 ## [0.1.2] - 2020-12-17

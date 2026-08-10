@@ -38,8 +38,7 @@ The tests cover:
 - histogram, range, parity, and factored workloads;
 - noisy initialization and multiplicative-weights updates;
 - marginal reconstruction and error metrics;
-- invalid-input behavior and method ambiguity checks;
-- the DataFrames accessibility helper.
+- invalid-input behavior and method ambiguity checks.
 
 CI runs the suite on the oldest compatible Julia minor and the latest stable
 Julia 1.x release across Linux, macOS, and Windows.

@@ -166,24 +166,3 @@ end
         @test_skip "Docs.undocumented_names requires a newer Julia version"
     end
 end
-
-module DataAccessibilityTests
-using Test
-
-include(joinpath(@__DIR__, "..", "examples", "DataAccessibility.jl"))
-
-@testset "Data accessibility example" begin
-    domains = [["a", "b"], [10, 20]]
-    data = DataFrame(first=["a", "b", "a"], second=[10, 20, 20])
-    histogram, mappings = createHistogram(data, domains)
-    @test histogram == [1.0, 0.0, 1.0, 1.0]
-
-    recreated = recreateDataset(histogram, mappings, domains)
-    @test size(recreated) == (3, 2)
-    @test createHistogram([0 0; 1 1; 0 1], [[0, 1], [0, 1]])[1] == [1.0, 0.0, 1.0, 1.0]
-    @test reverse_flatten_index(3, [2, 2]) == [1, 1]
-
-    contingency = DataFrame(code=[0, 1, 10], count=[2.0, 3.0, 4.0])
-    @test readContingencyTable(contingency, 2) == [2.0, 3.0, 4.0, 0.0]
-end
-end
